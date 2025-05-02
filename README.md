@@ -1,3 +1,6 @@
+> [!NOTE]
+> The code in this repo has been created with the help of AI. Use at your own risk.
+
 # macOS System Setup Script
 
 A comprehensive bash script for automating macOS system configuration and software installation.
