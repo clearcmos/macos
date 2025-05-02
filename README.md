@@ -52,12 +52,12 @@ The script handles the following tasks:
 
 2. Make the script executable:
    ```bash
-   chmod +x setup_macos.sh
+   chmod +x start.sh
    ```
 
 3. Run the script:
    ```bash
-   ./setup_macos.sh
+   ./start.sh
    ```
 
 ## Customization
@@ -88,7 +88,7 @@ Modify the `manage_dock` function to add, remove, or reposition your favorite ap
 
 ## Troubleshooting
 
-- **Permissions Issues**: If you encounter permission errors, ensure the script is executable (`chmod +x setup_macos.sh`) and that you have administrator privileges.
+- **Permissions Issues**: If you encounter permission errors, ensure the script is executable (`chmod +x start.sh`) and that you have administrator privileges.
 - **Homebrew Installation Failures**: If Homebrew installation fails, check your internet connection and macOS version compatibility.
 - **Package Installation Errors**: Some packages may fail to install due to dependencies or compatibility issues. The script will continue with other tasks and log errors.
 
