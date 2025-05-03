@@ -202,7 +202,11 @@ manage_homebrew_packages() {
   
   # Clean up any orphaned dependencies that are no longer needed
   log "Cleaning up orphaned dependencies..."
-  DEPS_REMOVED=$($BREW autoremove -n | grep -c "Would remove:" || echo "0")
+  DEPS_REMOVED=$($BREW autoremove -n | grep -c "Would remove:" || true)
+  # Ensure DEPS_REMOVED is a single integer
+  if [[ ! "$DEPS_REMOVED" =~ ^[0-9]+$ ]]; then
+    DEPS_REMOVED=0
+  fi
   
   if [ "$DEPS_REMOVED" -gt 0 ]; then
     log "Found $DEPS_REMOVED orphaned dependencies to remove"
