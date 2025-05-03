@@ -114,40 +114,33 @@ manage_homebrew_packages() {
     return 1
   }
   
-  # Define packages to manage - edit this list to add/remove packages
-  BREW_PACKAGES=(
-    "alt-tab"
-    "betterdisplay"
-    "brave-browser"
-    "chatgpt"
-    "claude"
-    "discord"
-    "dockutil"
-    "ffmpeg"
-    "find-any-file"
-    "fzf"
-    "imagemagick"
-    "linearmouse"
-    "messenger"
-    "mos"
-    "nano"
-    "obsidian"
-    "ollama"
-    "pandoc"
-    "rclone"
-    "rectangle"
-    "spotify"
-    "visual-studio-code"
-    "vlc"
-    "windows-app"
-    "zsh-autosuggestions"
-    "zsh-syntax-highlighting"
-  )
+  # Path to packages file
+  PACKAGES_FILE="$(dirname "$0")/packages.txt"
+  
+  # Check if packages file exists
+  if [ ! -f "$PACKAGES_FILE" ]; then
+    log_error "Packages file not found at $PACKAGES_FILE"
+    return 1
+  fi
+  
+  # Read packages from file into array
+  BREW_PACKAGES=()
+  while IFS= read -r line || [[ -n "$line" ]]; do
+    # Skip empty lines and comments
+    if [[ -n "$line" && ! "$line" =~ ^[[:space:]]*# ]]; then
+      BREW_PACKAGES+=("$line")
+    fi
+  done < "$PACKAGES_FILE"
+  
+  # Confirm packages were loaded
+  if [ ${#BREW_PACKAGES[@]} -eq 0 ]; then
+    log_error "No packages found in $PACKAGES_FILE"
+    return 1
+  else
+    log_success "Loaded ${#BREW_PACKAGES[@]} packages from $PACKAGES_FILE"
+  fi
   
   log "Using Homebrew at: $BREW"
-  
-  # Get list of currently installed Homebrew packages
-  INSTALLED_PACKAGES=($($BREW list --formula --cask 2>/dev/null))
   
   # Update Homebrew (but don't fail if update fails)
   log "Updating Homebrew..."
@@ -169,10 +162,19 @@ manage_homebrew_packages() {
     fi
   done
   
-  # Find packages to uninstall - installed packages that are not in our configuration
+  # Get list of explicitly installed Homebrew packages (leaves) - not dependencies
+  # --cask for GUI applications
+  INSTALLED_CASKS=($($BREW list --cask 2>/dev/null))
+  # --formula for CLI tools, using leaves to get only explicitly installed packages
+  INSTALLED_FORMULAS=($($BREW leaves 2>/dev/null))
+  
+  # Combine casks and explicitly installed formulas
+  INSTALLED_PACKAGES=("${INSTALLED_CASKS[@]}" "${INSTALLED_FORMULAS[@]}")
+  
+  # Find packages to uninstall - explicitly installed packages that are not in our configuration
   PACKAGES_UNINSTALLED=0
   for installed_pkg in "${INSTALLED_PACKAGES[@]}"; do
-    # Skip system packages and dependencies that Homebrew manages
+    # Skip system packages that Homebrew manages
     if [[ "$installed_pkg" == "openssl"* || "$installed_pkg" == "xz" || "$installed_pkg" == "ca-certificates" ]]; then
       continue
     fi
@@ -197,6 +199,18 @@ manage_homebrew_packages() {
       fi
     fi
   done
+  
+  # Clean up any orphaned dependencies that are no longer needed
+  log "Cleaning up orphaned dependencies..."
+  DEPS_REMOVED=$($BREW autoremove -n | grep -c "Would remove:" || echo "0")
+  
+  if [ "$DEPS_REMOVED" -gt 0 ]; then
+    log "Found $DEPS_REMOVED orphaned dependencies to remove"
+    $BREW autoremove
+    log_success "Removed orphaned dependencies"
+  else
+    log "No orphaned dependencies found"
+  fi
   
   log_success "Homebrew package management complete. Installed: $PACKAGES_INSTALLED, Uninstalled: $PACKAGES_UNINSTALLED"
 }
@@ -366,21 +380,13 @@ configure_nano() {
   cat > "$NANORC_FILE" << EOF
 # Nano editor configuration
 
-# Enable autoindent
 set autoindent
-
-# Use tab size of 4
 set tabsize 4
-
-# Convert tabs to spaces
 set tabstospaces
+unset mouse
 
-# Enable mouse support
-set mouse
-
-# Display line numbers with white on black color
-set linenumbers
-set numbercolor white,black
+#set linenumbers
+#set numbercolor white,black
 
 # Include syntax highlighting definitions provided by Homebrew nano
 include "/opt/homebrew/share/nano/*.nanorc"
@@ -388,18 +394,7 @@ EOF
   
   log_success "Nano configuration created with autoindent and syntax highlighting"
   
-  # Create an alias to use the Homebrew version of nano
-  if [ -f "$HOME/.zshrc" ]; then
-    if ! grep -q "alias nano=" "$HOME/.zshrc"; then
-      log "Adding nano alias to .zshrc to use Homebrew version"
-      echo "" >> "$HOME/.zshrc"
-      echo "# Use Homebrew nano instead of system version" >> "$HOME/.zshrc"
-      echo "alias nano=\"$(brew --prefix)/bin/nano\"" >> "$HOME/.zshrc"
-      log_success "Added alias for Homebrew nano"
-    else
-      log "Nano alias already exists in .zshrc"
-    fi
-  fi
+  # NOTE: Nano alias is now managed in the dedicated aliases file
 }
 
 # ------------------------------------------------------------------------------
@@ -425,6 +420,42 @@ manage_zshrc() {
     log "Backing up current .zshrc to the repository"
     cp "$HOME/.zshrc" "$(pwd)/.zshrc"
     log_success "Backed up .zshrc to $(pwd)/.zshrc"
+  fi
+  
+  # Configure aliases sourcing
+  if [ -f "$(pwd)/aliases" ]; then
+    log "Setting up aliases sourcing in .zshrc..."
+    
+    # Check if .zshrc already has the aliases sourcing line
+    if ! grep -q "source $(pwd)/aliases" "$HOME/.zshrc"; then
+      log "Adding aliases sourcing to .zshrc"
+      echo "" >> "$HOME/.zshrc"
+      echo "# Source aliases from the macos repository" >> "$HOME/.zshrc"
+      echo "source $(pwd)/aliases" >> "$HOME/.zshrc"
+      log_success "Added aliases sourcing to .zshrc"
+    else
+      log "Aliases sourcing already configured in .zshrc"
+    fi
+  else
+    log_warning "Aliases file not found at $(pwd)/aliases"
+  fi
+  
+  # Configure functions sourcing
+  if [ -f "$(pwd)/functions" ]; then
+    log "Setting up functions sourcing in .zshrc..."
+    
+    # Check if .zshrc already has the functions sourcing line
+    if ! grep -q "source $(pwd)/functions" "$HOME/.zshrc"; then
+      log "Adding functions sourcing to .zshrc"
+      echo "" >> "$HOME/.zshrc"
+      echo "# Source functions from the macos repository" >> "$HOME/.zshrc"
+      echo "source $(pwd)/functions" >> "$HOME/.zshrc"
+      log_success "Added functions sourcing to .zshrc"
+    else
+      log "Functions sourcing already configured in .zshrc"
+    fi
+  else
+    log_warning "Functions file not found at $(pwd)/functions"
   fi
 }
 

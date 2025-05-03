@@ -38,3 +38,9 @@ source /opt/homebrew/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 source /opt/homebrew/share/zsh-autosuggestions/zsh-autosuggestions.zsh
 # Use Homebrew nano instead of system version
 alias nano="/opt/homebrew/bin/nano"
+
+# Source aliases from the macos repository
+source /Users/nicholas/git/macos/aliases
+
+# Source functions from the macos repository
+source /Users/nicholas/git/macos/functions

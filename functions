@@ -1,0 +1,64 @@
+# System functions for macOS setup
+# This file is sourced by .zshrc when set up by start.sh
+
+# Interactive directory navigation using fzf
+bs() {
+  echo "Search for: "
+  read pkgname
+  brew search "$pkgname" &> /dev/null || { echo; echo "No formulae or casks found for $pkgname. Skipping info."; return 1; }
+  
+  brew info "$pkgname"
+  
+  if [[ $(brew info "$pkgname") =~ "Error: No available formula with the name" ]]; then
+    echo "No available formula with this name."
+    return 1
+  elif [[ $(brew info "$pkgname") =~ "Not installed" ]]; then
+    echo "Package '$pkgname' not installed. Install it? (y/n)"
+    read -r install_choice
+    if [ "$install_choice" = "y" ]; then
+      brew install "$pkgname"
+
+      PACKAGES_FILE="/Users/$(whoami)/git/macos/packages.txt"
+      if [ ! -f "$PACKAGES_FILE" ]; then
+        echo "$pkgname" > "$PACKAGES_FILE"
+      else
+        # Check if package is already in the file
+        if grep -q "^$pkgname$" "$PACKAGES_FILE"; then
+          echo "Package already in $PACKAGES_FILE"
+        else
+          # Add package to file and sort alphabetically
+          echo "$pkgname" >> "$PACKAGES_FILE"
+          sort -o "$PACKAGES_FILE" "$PACKAGES_FILE"
+          echo "Added $pkgname to $PACKAGES_FILE"
+        fi
+      fi
+    else
+      echo "Skipping installation."
+    fi
+  else
+    echo "Package already installed."
+  fi
+}
+
+g() {
+    local selected_file
+    local target_dir
+    
+    if [ -z "$1" ]; then
+        selected_file=$(fzf)
+    else
+        selected_file=$(cd "$1" && fzf)
+    fi
+    
+    if [ -n "$selected_file" ]; then
+        target_dir=$(dirname "$selected_file")
+        
+        if [ -d "$target_dir" ] && [ -x "$target_dir" ]; then
+            cd "$target_dir" && ls
+        else
+            echo "You don't have permission to access $target_dir"
+            echo "Consider running: sudo -i"
+            echo "Then navigate to the directory manually"
+        fi
+    fi
+}

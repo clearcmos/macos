@@ -1,0 +1,8 @@
+# System aliases for macOS setup
+# This file is sourced by .zshrc when set up by start.sh
+
+# Use Homebrew nano instead of system version
+alias compress='dir=$(basename "$(pwd)"); tar -czpf "${dir}.tar.gz" --exclude="${dir}.tar.gz" .'
+alias gen='openssl rand -base64 45'
+alias ls='ls -lh'
+alias nano="/opt/homebrew/bin/nano"
