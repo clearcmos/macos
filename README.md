@@ -38,6 +38,13 @@ The script handles the following tasks:
 6. **ZSH Configuration Management**
    - Backs up and restores .zshrc configurations
    - Updates shell prompt to show hostname
+   - Sources custom aliases and functions
+
+7. **Custom Shell Functions**
+   - `g` function for fuzzy file navigation using fzf
+   - `bs` (brew search) for easy package search and installation
+   - `pushmac` for AI-assisted Git commit message generation using ollama
+   - `compress` alias for easy directory compression
 
 ## Prerequisites
 
@@ -49,8 +56,8 @@ The script handles the following tasks:
 
 1. Clone this repository:
    ```bash
-   git clone https://github.com/yourusername/macos-setup.git
-   cd macos-setup
+   git clone https://github.com/clearcmos/macos.git
+   cd macos
    ```
 
 2. Make the script executable:
@@ -67,14 +74,21 @@ The script handles the following tasks:
 
 ### Package Management
 
-Edit the `BREW_PACKAGES` array in the script to customize which applications and utilities to install:
+Edit the `packages.txt` file to customize which applications and utilities to install:
 
 ```bash
-BREW_PACKAGES=(
-  "brave-browser"
-  "visual-studio-code"
-  # Add or remove packages as needed
-)
+# Example packages.txt content
+brave-browser
+visual-studio-code
+node
+nano
+# Add or remove packages as needed
+```
+
+The script also provides a convenient `bs` (brew search) function to search and install packages, which automatically adds them to your packages.txt file:
+
+```bash
+bs  # Follow the prompts to search and install a package
 ```
 
 ### Hostname
@@ -88,6 +102,29 @@ DESIRED_HOSTNAME="your-hostname-here"
 ### Dock Configuration
 
 Modify the `manage_dock` function to add, remove, or reposition your favorite applications in the Dock.
+
+### Shell Functions and Aliases
+
+Custom shell functions are stored in the `functions.d` directory, with each file focused on a specific category:
+
+- `brew.sh` - Functions for Homebrew package management
+- `git.sh` - Git automation and AI-assisted commit message generation
+- `navigation.sh` - Improved directory navigation with fuzzy search
+
+The `aliases` file contains helpful shortcuts like:
+```bash
+# Compress the current directory
+compress
+
+# Generate a random base64 string (useful for passwords)
+gen
+
+# Enhanced directory listing
+ls
+
+# Use the Homebrew version of nano
+nano
+```
 
 ## Troubleshooting
 
