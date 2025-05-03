@@ -444,22 +444,29 @@ manage_zshrc() {
     log_warning "Aliases file not found at $(pwd)/aliases"
   fi
   
-  # Configure functions sourcing
-  if [ -f "$(pwd)/functions" ]; then
-    log "Setting up functions sourcing in .zshrc..."
-    
-    # Check if .zshrc already has the functions sourcing line
-    if ! grep -q "source $(pwd)/functions" "$HOME/.zshrc"; then
-      log "Adding functions sourcing to .zshrc"
-      echo "" >> "$HOME/.zshrc"
-      echo "# Source functions from the macos repository" >> "$HOME/.zshrc"
-      echo "source $(pwd)/functions" >> "$HOME/.zshrc"
-      log_success "Added functions sourcing to .zshrc"
-    else
-      log "Functions sourcing already configured in .zshrc"
-    fi
+  # Configure direct functions.d sourcing
+  log "Setting up functions.d sourcing in .zshrc..."
+  
+  # Make sure functions.d directory exists
+  if [ ! -d "$(pwd)/functions.d" ]; then
+    log "Creating functions.d directory"
+    mkdir -p "$(pwd)/functions.d"
+    log_success "Created functions.d directory"
+  fi
+  
+  # Check if .zshrc already has the functions.d sourcing code
+  if ! grep -q "for function_file in \$(pwd)/functions.d/\*.sh" "$HOME/.zshrc"; then
+    log "Adding functions.d sourcing to .zshrc"
+    echo "" >> "$HOME/.zshrc"
+    echo "# Source all function files from functions.d directory" >> "$HOME/.zshrc"
+    echo "for function_file in \$(pwd)/functions.d/*.sh; do" >> "$HOME/.zshrc"
+    echo "  if [ -f \"\$function_file\" ]; then" >> "$HOME/.zshrc"
+    echo "    source \"\$function_file\"" >> "$HOME/.zshrc"
+    echo "  fi" >> "$HOME/.zshrc"
+    echo "done" >> "$HOME/.zshrc"
+    log_success "Added functions.d sourcing to .zshrc"
   else
-    log_warning "Functions file not found at $(pwd)/functions"
+    log "Functions.d sourcing already configured in .zshrc"
   fi
 }
 

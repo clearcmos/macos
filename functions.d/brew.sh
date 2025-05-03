@@ -1,7 +1,5 @@
-# System functions for macOS setup
-# This file is sourced by .zshrc when set up by start.sh
+# Homebrew related functions
 
-# Interactive directory navigation using fzf
 bs() {
   echo "Search for: "
   read pkgname
@@ -24,19 +22,13 @@ bs() {
       if [ ! -f "$PACKAGES_FILE" ]; then
         echo "$pkgname" > "$PACKAGES_FILE"
       else
-        # Check if package is already in the file
         if grep -q "^$pkgname$" "$PACKAGES_FILE"; then
           echo "Package already in $PACKAGES_FILE"
         else
-          # Add package to file as a new line and sort alphabetically
-          # First check if the last line of the file ends with a newline
           if [ -s "$PACKAGES_FILE" ] && [ "$(tail -c1 "$PACKAGES_FILE" | wc -l)" -eq 0 ]; then
-            # Last line doesn't end with newline, add it
             echo "" >> "$PACKAGES_FILE"
           fi
-          # Now add the new package
           echo "$pkgname" >> "$PACKAGES_FILE"
-          # Sort the file
           sort -o "$PACKAGES_FILE" "$PACKAGES_FILE"
           echo "Added $pkgname to $PACKAGES_FILE"
         fi
@@ -47,27 +39,4 @@ bs() {
   else
     echo "Package already installed."
   fi
-}
-
-g() {
-    local selected_file
-    local target_dir
-    
-    if [ -z "$1" ]; then
-        selected_file=$(fzf)
-    else
-        selected_file=$(cd "$1" && fzf)
-    fi
-    
-    if [ -n "$selected_file" ]; then
-        target_dir=$(dirname "$selected_file")
-        
-        if [ -d "$target_dir" ] && [ -x "$target_dir" ]; then
-            cd "$target_dir" && ls
-        else
-            echo "You don't have permission to access $target_dir"
-            echo "Consider running: sudo -i"
-            echo "Then navigate to the directory manually"
-        fi
-    fi
 }
