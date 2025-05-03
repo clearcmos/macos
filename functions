@@ -7,12 +7,14 @@ bs() {
   read pkgname
   brew search "$pkgname" &> /dev/null || { echo; echo "No formulae or casks found for $pkgname. Skipping info."; return 1; }
   
-  brew info "$pkgname"
+  local brew_info
+  brew_info=$(brew info "$pkgname")
+  echo "$brew_info"
   
-  if [[ $(brew info "$pkgname") =~ "Error: No available formula with the name" ]]; then
+  if [[ "$brew_info" =~ "Error: No available formula with the name" ]]; then
     echo "No available formula with this name."
     return 1
-  elif [[ $(brew info "$pkgname") =~ "Not installed" ]]; then
+  elif [[ "$brew_info" =~ "Not installed" ]]; then
     echo "Package '$pkgname' not installed. Install it? (y/n)"
     read -r install_choice
     if [ "$install_choice" = "y" ]; then
@@ -26,8 +28,15 @@ bs() {
         if grep -q "^$pkgname$" "$PACKAGES_FILE"; then
           echo "Package already in $PACKAGES_FILE"
         else
-          # Add package to file and sort alphabetically
+          # Add package to file as a new line and sort alphabetically
+          # First check if the last line of the file ends with a newline
+          if [ -s "$PACKAGES_FILE" ] && [ "$(tail -c1 "$PACKAGES_FILE" | wc -l)" -eq 0 ]; then
+            # Last line doesn't end with newline, add it
+            echo "" >> "$PACKAGES_FILE"
+          fi
+          # Now add the new package
           echo "$pkgname" >> "$PACKAGES_FILE"
+          # Sort the file
           sort -o "$PACKAGES_FILE" "$PACKAGES_FILE"
           echo "Added $pkgname to $PACKAGES_FILE"
         fi

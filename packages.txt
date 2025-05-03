@@ -1,10 +1,11 @@
 alt-tab
 balenaetcher
-bettertouchtool
 betterdisplay
+bettertouchtool
 brave-browser
 chatgpt
 claude
+coteditor
 discord
 dockutil
 ffmpeg
