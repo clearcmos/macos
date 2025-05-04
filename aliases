@@ -3,5 +3,5 @@
 
 alias compress='dir=$(basename "$(pwd)"); tar -czpf "${dir}.tar.gz" --exclude="${dir}.tar.gz" .'
 alias gen='openssl rand -base64 45'
-alias ls='ls -lh'
+alias ls='gls -lha --group-directories-first --color=auto'
 alias nano="/opt/homebrew/bin/nano"

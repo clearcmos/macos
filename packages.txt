@@ -5,6 +5,7 @@ bettertouchtool
 brave-browser
 chatgpt
 claude
+coreutils
 coteditor
 discord
 dockutil
@@ -15,13 +16,13 @@ imagemagick
 linearmouse
 lunar
 messenger
-mos
 multipass
 nano
 node
 obsidian
 ollama
 pandoc
+profind
 rclone
 rectangle
 spotify

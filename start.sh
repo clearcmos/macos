@@ -471,6 +471,27 @@ manage_zshrc() {
 }
 
 # ------------------------------------------------------------------------------
+# SECTION 7: App Configuration Backup
+# ------------------------------------------------------------------------------
+backup_app_configurations() {
+  log "Backing up application configurations..."
+  
+  if [ -f "$(pwd)/config/config-backup.sh" ]; then
+    log "Running app configuration backup script"
+    bash "$(pwd)/config/config-backup.sh"
+    
+    if [ $? -eq 0 ]; then
+      log_success "Application configurations backed up successfully"
+    else
+      log_error "Failed to backup application configurations"
+      return 1
+    fi
+  else
+    log_warning "App configuration backup script not found at $(pwd)/config/config-backup.sh"
+  fi
+}
+
+# ------------------------------------------------------------------------------
 # MAIN SCRIPT EXECUTION
 # ------------------------------------------------------------------------------
 main() {
@@ -487,16 +508,16 @@ main() {
   fi
   
   # Run each section with error handling
-  log "Step 1/7: Installing and updating Homebrew"
+  log "Step 1/8: Installing and updating Homebrew"
   ensure_homebrew_installed || {
     log_error "Homebrew installation/update failed"
     log_warning "Continuing with other tasks..."
   }
   
-  log "Step 2/7: Managing Homebrew packages"
+  log "Step 2/8: Managing Homebrew packages"
   manage_homebrew_packages || log_error "Homebrew package management failed"
   
-  log "Step 3/7: Checking hostname configuration"
+  log "Step 3/8: Checking hostname configuration"
   configure_hostname || log_error "Hostname configuration failed"
   
   # Update zsh prompt to show hostname
@@ -516,17 +537,20 @@ main() {
     log_warning "Please restart your terminal or run 'source ~/.zshrc' for prompt changes to take effect"
   fi
   
-  log "Step 4/7: Managing npm packages"
+  log "Step 4/8: Managing npm packages"
   manage_npm_packages || log_error "npm package management failed"
   
-  log "Step 5/7: Managing macOS Dock"
+  log "Step 5/8: Managing macOS Dock"
   manage_dock || log_error "Dock management failed"
   
-  log "Step 6/7: Configuring GNU nano"
+  log "Step 6/8: Configuring GNU nano"
   configure_nano || log_error "Nano configuration failed"
   
-  log "Step 7/7: Managing .zshrc configuration"
+  log "Step 7/8: Managing .zshrc configuration"
   manage_zshrc || log_error ".zshrc management failed"
+  
+  log "Step 8/8: Backing up application configurations"
+  backup_app_configurations || log_error "App configuration backup failed"
   
   log_success "macOS system setup completed!"
 }
