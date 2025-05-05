@@ -43,6 +43,13 @@ alias nano="/opt/homebrew/bin/nano"
 source /Users/nicholas/git/macos/aliases
 
 # Source all function files from functions.d directory
+for function_file in $HOME/git/macos/functions.d/*.sh; do
+  if [ -f "$function_file" ]; then
+    source "$function_file"
+  fi
+done
+
+# Source all function files from functions.d directory
 for function_file in $(pwd)/functions.d/*.sh; do
   if [ -f "$function_file" ]; then
     source "$function_file"

@@ -1,24 +1,18 @@
-# Navigation related functions
+repo() {
+  local dirs=() i=1 choice dir
 
-g() {
-    local selected_file
-    local target_dir
-    
-    if [ -z "$1" ]; then
-        selected_file=$(fzf)
-    else
-        selected_file=$(cd "$1" && fzf)
-    fi
-    
-    if [ -n "$selected_file" ]; then
-        target_dir=$(dirname "$selected_file")
-        
-        if [ -d "$target_dir" ] && [ -x "$target_dir" ]; then
-            cd "$target_dir" && ls
-        else
-            echo "You don't have permission to access $target_dir"
-            echo "Consider running: sudo -i"
-            echo "Then navigate to the directory manually"
-        fi
-    fi
+  while IFS= read -r dir; do
+    dirs+=("$dir")
+    echo "$i. $(basename "$dir")"
+    ((i++))
+  done < <(find ~/git -mindepth 1 -maxdepth 1 -type d -print | LC_ALL=C sort -f)
+
+  echo "Found ${#dirs[@]} directories"
+
+  read "choice?Choose a directory number: "
+  if [[ "$choice" =~ '^[0-9]+$' ]] && (( choice >= 1 && choice <= $#dirs )); then
+    cd "${dirs[choice-1]}"
+  else
+    echo "Invalid choice."
+  fi
 }

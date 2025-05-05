@@ -45,6 +45,15 @@ The script handles the following tasks:
    - `bs` (brew search) for easy package search and installation
    - `pushmac` for AI-assisted Git commit message generation using ollama
    - `compress` alias for easy directory compression
+   
+8. **Application Configuration Management**
+   - Backs up app configurations with `config/backup.sh`
+   - Restores app configurations with `config/restore.sh`
+   - Manages NAS mounts with `config/mounts.sh`
+   - Cleans up mount points with `config/cleanup.sh`
+   
+9. **Ollama Integration**
+   - Manages Ollama server with the `oserve` function
 
 ## Prerequisites
 
@@ -103,6 +112,24 @@ DESIRED_HOSTNAME="your-hostname-here"
 
 Modify the `manage_dock` function to add, remove, or reposition your favorite applications in the Dock.
 
+### Configuration Scripts
+
+The `config` directory contains scripts for managing various aspects of your macOS setup:
+
+- `backup.sh` - Backs up application configurations to the config directory
+- `restore.sh` - Restores application configurations from the config directory
+- `mounts.sh` - Sets up network share mounts using SMB
+
+To use the mount script, create a `.env` file in the repository root with the following content:
+
+```bash
+NAS_HOST="your-nas-ip-or-hostname"
+NAS_SHARE_NAME="your-share-name"
+NAS_USERNAME="your-username"
+NAS_PASSWORD="your-password"
+MOUNT_POINT="/Volumes/your-mount-name"
+```
+
 ### Shell Functions and Aliases
 
 Custom shell functions are stored in the `functions.d` directory, with each file focused on a specific category:
@@ -110,6 +137,12 @@ Custom shell functions are stored in the `functions.d` directory, with each file
 - `brew.sh` - Functions for Homebrew package management
 - `git.sh` - Git automation and AI-assisted commit message generation
 - `navigation.sh` - Improved directory navigation with fuzzy search
+- `fzf.sh` - Fuzzy finding functions for files and directories
+  - `c` - Select and cat a file using fzf
+  - `g` - Select and navigate to a file's directory using fzf
+  - `n` - Select and edit a file with nano using fzf
+- `ollama.sh` - Functions for Ollama LLM server management
+  - `oserve` - Start, stop and manage the Ollama server
 
 The `aliases` file contains helpful shortcuts like:
 ```bash

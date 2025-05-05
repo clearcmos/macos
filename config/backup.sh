@@ -1,7 +1,16 @@
 #!/bin/bash
 
+# Source environment variables
+if [[ -f "$HOME/git/macos/.env" ]]; then
+    source "$HOME/git/macos/.env"
+else
+    echo "Error: .env file not found at $HOME/git/macos/.env"
+    exit 1
+fi
+
 # List of apps to backup
 APP_CONFIGS=(
+    "alt-tab"
     "bettertouchtool"
     "linearmouse"
     # Add more apps here
@@ -11,6 +20,10 @@ APP_CONFIGS=(
 mkdir -p "$(dirname "${BASH_SOURCE[0]}")"
 CONFIG_DIR="$(dirname "${BASH_SOURCE[0]}")"
 PACKAGES_FILE="$(dirname "${BASH_SOURCE[0]}")/../packages.txt"
+
+# Ensure NAS backup directory exists
+NAS_BACKUP_DIR="/Volumes/$NAS_SHARE_NAME/backups/mba"
+mkdir -p "$NAS_BACKUP_DIR"
 
 # Function to check if an app is installed (listed in packages.txt)
 is_app_installed() {
@@ -57,6 +70,16 @@ backup_app_config() {
             fi
             ;;
             
+        "alt-tab")
+            # Create app config directory if it doesn't exist
+            mkdir -p "$CONFIG_DIR/$app_name"
+            
+            # Backup plist file
+            if [[ -f ~/Library/Preferences/com.lwouis.alt-tab-macos.plist ]]; then
+                rsync -a ~/Library/Preferences/com.lwouis.alt-tab-macos.plist "$CONFIG_DIR/$app_name/"
+            fi
+            ;;
+            
         # Add more apps with their specific backup logic
         *)
             echo "No backup logic defined for $app_name"
@@ -73,6 +96,19 @@ backup_all_configs() {
     done
     
     echo "App configuration backup completed"
+    
+    # Now copy the entire config directory to NAS
+    echo "Copying backup to NAS at $NAS_BACKUP_DIR..."
+    DATE_STAMP=$(date +"%Y%m%d_%H%M%S")
+    BACKUP_NAME="macos_config_$DATE_STAMP"
+    
+    # Create a timestamped directory in the NAS location
+    mkdir -p "$NAS_BACKUP_DIR/$BACKUP_NAME"
+    
+    # Copy all configs to the NAS
+    rsync -av "$CONFIG_DIR/" "$NAS_BACKUP_DIR/$BACKUP_NAME/"
+    
+    echo "Backup copied to NAS at $NAS_BACKUP_DIR/$BACKUP_NAME"
 }
 
 # Run the backup

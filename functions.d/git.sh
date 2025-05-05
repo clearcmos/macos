@@ -20,7 +20,7 @@ pushmac() {
   
   rm /tmp/git_diff.txt
   
-  echo "Proposed commit message: $commit_message"
+  echo "$commit_message"
   echo "Press ENTER to confirm, or 'r' to enter your own message:"
   read response
   

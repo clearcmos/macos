@@ -115,7 +115,7 @@ manage_homebrew_packages() {
   }
   
   # Path to packages file
-  PACKAGES_FILE="$(dirname "$0")/packages.txt"
+  PACKAGES_FILE="$HOME/git/macos/packages.txt"
   
   # Check if packages file exists
   if [ ! -f "$PACKAGES_FILE" ]; then
@@ -412,54 +412,54 @@ manage_zshrc() {
     log_warning "No .zshrc file found in home directory"
     
     # Check if we have a local copy to use
-    if [ -f "$(pwd)/.zshrc" ]; then
+    if [ -f "$HOME/git/macos/.zshrc" ]; then
       log "Found local .zshrc, copying to home directory"
-      cp "$(pwd)/.zshrc" "$HOME/.zshrc"
+      cp "$HOME/git/macos/.zshrc" "$HOME/.zshrc"
       log_success "Copied .zshrc to home directory"
     else
       log_warning "No local .zshrc found to copy to home directory"
     fi
   else
-    # Copy the home .zshrc to the current directory
+    # Copy the home .zshrc to the repository
     log "Backing up current .zshrc to the repository"
-    cp "$HOME/.zshrc" "$(pwd)/.zshrc"
-    log_success "Backed up .zshrc to $(pwd)/.zshrc"
+    cp "$HOME/.zshrc" "$HOME/git/macos/.zshrc"
+    log_success "Backed up .zshrc to $HOME/git/macos/.zshrc"
   fi
   
   # Configure aliases sourcing
-  if [ -f "$(pwd)/aliases" ]; then
+  if [ -f "$HOME/git/macos/aliases" ]; then
     log "Setting up aliases sourcing in .zshrc..."
     
     # Check if .zshrc already has the aliases sourcing line
-    if ! grep -q "source $(pwd)/aliases" "$HOME/.zshrc"; then
+    if ! grep -q "source \$HOME/git/macos/aliases" "$HOME/.zshrc"; then
       log "Adding aliases sourcing to .zshrc"
       echo "" >> "$HOME/.zshrc"
       echo "# Source aliases from the macos repository" >> "$HOME/.zshrc"
-      echo "source $(pwd)/aliases" >> "$HOME/.zshrc"
+      echo "source \$HOME/git/macos/aliases" >> "$HOME/.zshrc"
       log_success "Added aliases sourcing to .zshrc"
     else
       log "Aliases sourcing already configured in .zshrc"
     fi
   else
-    log_warning "Aliases file not found at $(pwd)/aliases"
+    log_warning "Aliases file not found at $HOME/git/macos/aliases"
   fi
   
   # Configure direct functions.d sourcing
   log "Setting up functions.d sourcing in .zshrc..."
   
   # Make sure functions.d directory exists
-  if [ ! -d "$(pwd)/functions.d" ]; then
+  if [ ! -d "$HOME/git/macos/functions.d" ]; then
     log "Creating functions.d directory"
-    mkdir -p "$(pwd)/functions.d"
+    mkdir -p "$HOME/git/macos/functions.d"
     log_success "Created functions.d directory"
   fi
   
   # Check if .zshrc already has the functions.d sourcing code
-  if ! grep -q "for function_file in \$(pwd)/functions.d/\*.sh" "$HOME/.zshrc"; then
+  if ! grep -q "for function_file in \$HOME/git/macos/functions.d/\*.sh" "$HOME/.zshrc"; then
     log "Adding functions.d sourcing to .zshrc"
     echo "" >> "$HOME/.zshrc"
     echo "# Source all function files from functions.d directory" >> "$HOME/.zshrc"
-    echo "for function_file in \$(pwd)/functions.d/*.sh; do" >> "$HOME/.zshrc"
+    echo "for function_file in \$HOME/git/macos/functions.d/*.sh; do" >> "$HOME/.zshrc"
     echo "  if [ -f \"\$function_file\" ]; then" >> "$HOME/.zshrc"
     echo "    source \"\$function_file\"" >> "$HOME/.zshrc"
     echo "  fi" >> "$HOME/.zshrc"
@@ -476,9 +476,9 @@ manage_zshrc() {
 backup_app_configurations() {
   log "Backing up application configurations..."
   
-  if [ -f "$(pwd)/config/config-backup.sh" ]; then
+  if [ -f "$HOME/git/macos/config/backup.sh" ]; then
     log "Running app configuration backup script"
-    bash "$(pwd)/config/config-backup.sh"
+    bash "$HOME/git/macos/config/backup.sh"
     
     if [ $? -eq 0 ]; then
       log_success "Application configurations backed up successfully"
@@ -487,7 +487,7 @@ backup_app_configurations() {
       return 1
     fi
   else
-    log_warning "App configuration backup script not found at $(pwd)/config/config-backup.sh"
+    log_warning "App configuration backup script not found at $HOME/git/macos/config/backup.sh"
   fi
 }
 
@@ -501,9 +501,9 @@ main() {
   mkdir -p "$HOME/.config/home-manager"
   
   # Check if .zshrc exists in home directory, copy from local if not
-  if [ ! -f "$HOME/.zshrc" ] && [ -f "$(pwd)/.zshrc" ]; then
-    log "No .zshrc found in home directory but found in current directory, copying..."
-    cp "$(pwd)/.zshrc" "$HOME/.zshrc"
+  if [ ! -f "$HOME/.zshrc" ] && [ -f "$HOME/git/macos/.zshrc" ]; then
+    log "No .zshrc found in home directory but found in repository, copying..."
+    cp "$HOME/git/macos/.zshrc" "$HOME/.zshrc"
     log_success "Copied .zshrc to home directory"
   fi
   

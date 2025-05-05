@@ -1,8 +1,14 @@
 # Homebrew related functions
 
-bs() {
-  echo "Search for: "
-  read pkgname
+b() {
+  local pkgname
+  if [ -n "$1" ]; then
+    pkgname="$1"
+  else
+    echo "Search for: "
+    read pkgname
+  fi
+  
   brew search "$pkgname" &> /dev/null || { echo; echo "No formulae or casks found for $pkgname. Skipping info."; return 1; }
   
   local brew_info
@@ -37,6 +43,16 @@ bs() {
       echo "Skipping installation."
     fi
   else
-    echo "Package already installed."
+    echo "Package already installed. Uninstall it? (y/n)"
+    read -r uninstall_choice
+    if [ "$uninstall_choice" = "y" ]; then
+      brew uninstall --force "$pkgname"
+      
+      PACKAGES_FILE="/Users/$(whoami)/git/macos/packages.txt"
+      if [ -f "$PACKAGES_FILE" ] && grep -q "^$pkgname$" "$PACKAGES_FILE"; then
+        sed -i '' "/^$pkgname$/d" "$PACKAGES_FILE"
+        echo "Removed $pkgname from $PACKAGES_FILE"
+      fi
+    fi
   fi
 }

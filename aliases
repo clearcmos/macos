@@ -5,3 +5,4 @@ alias compress='dir=$(basename "$(pwd)"); tar -czpf "${dir}.tar.gz" --exclude="$
 alias gen='openssl rand -base64 45'
 alias ls='gls -lha --group-directories-first --color=auto'
 alias nano="/opt/homebrew/bin/nano"
+alias ocode="python3 $HOME/git/macos/ollama/ocode.py"
